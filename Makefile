@@ -4,10 +4,10 @@ INCLUDES = -I ./include
 CFLAGS = -std=c99 -O3 -DMCBSP_COMPATIBILITY_MODE -Wall $(INCLUDES)
 LFLAGS= lib/compat-libmcbsp1.2.0.a -pthread -lm -lrt
 
-OBJPRIM= obj/compresspar.o obj/bspedupack.o obj/bsp-aux.o
+OBJPRIM= obj/compresspar.o obj/bspedupack.o obj/bsp-aux.o obj/lzw.o
 
 IDIR = ./include
-_DEPS = bspedupack.h mcbsp.h bsp-aux.h
+_DEPS = bspedupack.h mcbsp.h bsp-aux.h lzw.h
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 

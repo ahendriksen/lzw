@@ -4,7 +4,8 @@
    If not enough memory available, one processor halts them all.
 */
 
-double *vecallocd(int n) {
+double *vecallocd(int n)
+{
     /* This function allocates a vector of doubles of length n */
     double *pd;
 
@@ -19,7 +20,8 @@ double *vecallocd(int n) {
 
 } /* end vecallocd */
 
-int *vecalloci(int n) {
+int *vecalloci(int n)
+{
     /* This function allocates a vector of integers of length n */
     int *pi;
 
@@ -34,7 +36,8 @@ int *vecalloci(int n) {
 
 } /* end vecalloci */
 
-double **matallocd(int m, int n) {
+double **matallocd(int m, int n)
+{
     /* This function allocates an m x n matrix of doubles */
     int i;
     double *pd, **ppd;
@@ -61,7 +64,8 @@ double **matallocd(int m, int n) {
 
 } /* end matallocd */
 
-void vecfreed(double *pd) {
+void vecfreed(double *pd)
+{
     /* This function frees a vector of doubles */
 
     if (pd != NULL)
@@ -69,7 +73,8 @@ void vecfreed(double *pd) {
 
 } /* end vecfreed */
 
-void vecfreei(int *pi) {
+void vecfreei(int *pi)
+{
     /* This function frees a vector of integers */
 
     if (pi != NULL)
@@ -77,7 +82,8 @@ void vecfreei(int *pi) {
 
 } /* end vecfreei */
 
-void matfreed(double **ppd) {
+void matfreed(double **ppd)
+{
     /* This function frees a matrix of doubles */
 
     if (ppd != NULL) {
