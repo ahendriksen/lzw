@@ -29,7 +29,7 @@ clean:
 	rm -f obj/* bin/* 
 
 style:
-	clang-format-3.6 -i --style="{BasedOnStyle: llvm, IndentWidth: 4, AllowShortFunctionsOnASingleLine: None, KeepEmptyLinesAtTheStartOfBlocks: false}" src/*.c
+	clang-format-3.6 -i -style=file src/*.c
 
 tags: # make tags file for easy code navigation
 	ctags -e  -R .
