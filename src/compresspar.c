@@ -22,6 +22,23 @@ static int get_file_size(char *path) {
     }
 }
 
+/*
+   get_file_block reads a block from disk and stores it at the
+   location given by *dest.
+*/
+void get_file_block(char *path, int BLOCK_START, int BLOCK_SIZE, void *dest) {
+    FILE *fp;
+    if ((fp = fopen(name, "r")) == NULL) {
+        bsp_abort("Error: could not open file");
+    }
+    if (fseek(fp, BLOCK_START, SEEK_SET) == -1) {
+        bsp_abort("Error: could not seek in file");
+    }
+    if (fread(dest, sizeof(char), BLOCK_SIZE, fp) != BLOCK_SIZE) {
+        bsp_abort("Error: could not read file");
+    }
+}
+
 void bsp_compresssimple() {
     // Initialize parallel part
     int p, s;
@@ -45,24 +62,11 @@ void bsp_compresssimple() {
 
     // Put all characters from the file in array all_characters
     //(initial m are reserved for window of previous processor)
+    int BLOCK_START = block_distr_start(p, file_size, s);
     int BLOCK_SIZE = block_distr_len(p, file_size, s);
     char *all_characters = vecallocc(m + BLOCK_SIZE);
-    FILE *fp;
-    fp = fopen(name, "r");
-    char kar;
-    fseek(fp, s * BLOCK_SIZE, SEEK_SET);
-    (void)fscanf(fp, "%c", &kar);
-    int counter = 0;
-    while (counter < BLOCK_SIZE) {
-        if (file_size < 1000)
-            printf("%d: %c ", s, kar);
-        all_characters[m + counter] = kar;
-        counter++;
-        (void)fscanf(fp, "%c", &kar);
-    } // while
-    if (s == p - 1)
-        all_characters[m + BLOCK_SIZE - 1] = -1;
-    printf("\n");
+
+    get_file_block(name, BLOCK_START, BLOCK_SIZE, all_characters + m);
 
     // Register character array for exchange between processor
     //(currently the entire window is registered...)
@@ -142,11 +146,10 @@ int main(int argc, char *argv[]) {
 
     char choice;
     printf("(C)oderen of (D)ecoderen\n");
-    (void)scanf("%c", &choice);
-    if (choice == 'C' || choice == 'c') {
+
+    if (scanf("%c", &choice) == 1 && (choice == 'C' || choice == 'c')) {
         bsp_compresssimple();
     }
 
     exit(0);
-
 } /* end main */

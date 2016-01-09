@@ -36,7 +36,6 @@ int block_distr_len(int p, int n, int s) {
     return end - start;
 }
 
-char *vecallocc(int n) 
-{
-  return vecalloci(n / 4 + 1); 
+char *vecallocc(int n) {
+    return (char *)vecalloci(n / 4 + 1);
 }
