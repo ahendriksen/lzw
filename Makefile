@@ -11,7 +11,7 @@ _DEPS = bspedupack.h mcbsp.h
 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-.PHONY: all clean transfer
+.PHONY: all clean transfer style
 
 all: primes
 
@@ -27,3 +27,6 @@ transfer:
 
 clean:
 	rm -f obj/primes.o bin/* 
+
+style:
+	clang-format-3.6 -i --style="{BasedOnStyle: llvm, IndentWidth: 4, AllowShortFunctionsOnASingleLine: None, KeepEmptyLinesAtTheStartOfBlocks: false}" src/*.c
