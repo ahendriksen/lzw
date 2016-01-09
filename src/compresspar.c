@@ -1,13 +1,25 @@
-#include "bspedupack.h"
+#include <stdlib.h>
 #include <sys/stat.h>
+
+#include "bspedupack.h"
+#include "bsp-aux.h"
 
 int P;
 char *name;
 int m;
 int n;
 
-int str_to_int(char *i) {
-    return (int)strtol(i, (char **)NULL, 10);
+static int get_file_size(char *path);
+
+static int get_file_size(char *path) {
+    struct stat st;
+    int ret = stat(path, &st);
+
+    if (ret < 0) {
+        return -1;
+    } else {
+        return st.st_size;
+    }
 }
 
 void bsp_compresssimple() {
@@ -16,20 +28,23 @@ void bsp_compresssimple() {
     bsp_begin(P);
     p = bsp_nprocs(); /* p = number of processors obtained */
     s = bsp_pid();    /* s = processor number */
+    // Get file size
+    int file_size = get_file_size(name);
 
     // Print input
     if (s == 0) {
         printf("\nName: %s\nWindow length: %d\nLook ahead length: %d\n", name,
                m, n);
         printf("Number of processors: %d\n", P);
-    } // if
-
-    // Get file size
-    struct stat st;
-    stat(name, &st);
-    int file_size = st.st_size;
-    if (s == 0)
         printf("File size: %d bytes\n\n", file_size);
+    }
+
+    if (file_size < 0) {
+        bsp_abort("Error: file size could not be determined.\n");
+    }
+
+    int n_0 = block_distr_start(p, file_size, s); // index of start of interval
+    int l   = block_distr_len(p, file_size, s);     // length of own interval
 
     // Put all characters from the file in array all_characters
     //(initial m are reserved for window of previous processor)
@@ -63,7 +78,7 @@ void bsp_compresssimple() {
     bsp_sync();
 
     // Window values
-    int window = m; // m
+    int window = m;     // m
     int look_ahead = n; // n
 
     // Start encoding
@@ -73,7 +88,7 @@ void bsp_compresssimple() {
     for (i = m; i < BLOCK_SIZE + m; i++) { // iterate over all characters
         if ((s == 0 && i - window >= m) || (s != 0 && i - window >= 0))
             windowi = i - window; // Set starting index of window
-        int longestmatch = 0; // length of the matching
+        int longestmatch = 0;     // length of the matching
         int goback = 0;
 
         for (j = windowi; j < i - longestmatch; j++) { // iterate over window
@@ -94,7 +109,7 @@ void bsp_compresssimple() {
                 } // if
                 j = j + k;
             } // if
-        } // for
+        }     // for
         i = i + longestmatch;
         printf("%d: (%d,%d,%d)\n", s, goback, longestmatch,
                (int)all_characters[i]);
@@ -106,33 +121,22 @@ void bsp_compresssimple() {
 } // compress
 
 static const char *usage =
-    "Usage: parallel_lzw [file_name] [window size] [lookahead] [n_cores (P)]";
+    "Usage: parallel_lzw [path] [window size] [lookahead] [n_cores (P)]";
 
 int main(int argc, char *argv[]) {
     bsp_init(bsp_compresssimple, argc, argv);
 
     name = "";
 
-    if (argc < 4) {
+    if (argc != 5) {
         printf("Error in input: not enough arguments supplied.\n");
         printf("%s\n", usage);
         exit(1);
     }
-    if (argc > 1) {
-        name = argv[1];
-    }
-    if (argc > 2)
-        m = str_to_int(argv[2]);
-    else
-        m = 15; // Else statements can be left out
-    if (argc > 3)
-        n = str_to_int(argv[3]);
-    else
-        n = 15;
-    if (argc > 4)
-        P = str_to_int(argv[4]);
-    else
-        P = 1;
+    name = argv[1];
+    m = atoi(argv[2]);
+    n = atoi(argv[3]);
+    P = atoi(argv[4]);
 
     if (P > bsp_nprocs()) {
         printf("Sorry, not enough processors available.\n");
