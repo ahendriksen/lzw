@@ -43,25 +43,22 @@ void bsp_compresssimple() {
         bsp_abort("Error: file size could not be determined.\n");
     }
 
-    int n_0 = block_distr_start(p, file_size, s); // index of start of interval
-    int l   = block_distr_len(p, file_size, s);     // length of own interval
-
     // Put all characters from the file in array all_characters
     //(initial m are reserved for window of previous processor)
-    int BLOCK_SIZE = ceil((double)file_size / p);
-    char all_characters[m + BLOCK_SIZE];
+    int BLOCK_SIZE = block_distr_len(p, file_size, s);
+    char *all_characters = vecallocc(m + BLOCK_SIZE);
     FILE *fp;
     fp = fopen(name, "r");
     char kar;
     fseek(fp, s * BLOCK_SIZE, SEEK_SET);
-    fscanf(fp, "%c", &kar);
+    (void)fscanf(fp, "%c", &kar);
     int counter = 0;
     while (counter < BLOCK_SIZE) {
         if (file_size < 1000)
             printf("%d: %c ", s, kar);
         all_characters[m + counter] = kar;
         counter++;
-        fscanf(fp, "%c", &kar);
+        (void)fscanf(fp, "%c", &kar);
     } // while
     if (s == p - 1)
         all_characters[m + BLOCK_SIZE - 1] = -1;
@@ -145,7 +142,7 @@ int main(int argc, char *argv[]) {
 
     char choice;
     printf("(C)oderen of (D)ecoderen\n");
-    scanf("%c", &choice);
+    (void)scanf("%c", &choice);
     if (choice == 'C' || choice == 'c') {
         bsp_compresssimple();
     }
